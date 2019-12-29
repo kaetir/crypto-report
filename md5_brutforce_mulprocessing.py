@@ -5,11 +5,17 @@ from itertools import product
 import multiprocessing as mp
 import os
 
-
-def myhash(mot):
-	mot = "".join(mot)
-	if passwd == hashlib.md5(bytes(mot, "utf8")).hexdigest():
-		print("mot :", mot)
+# function for generating the hash from an char array
+def hash_func(word: list):
+	"""
+	@summary join and hash an array of characters and test the hash with the searched hash
+	@return print the password and kill the program
+	"""
+	word = "".join(word)
+	if passwd == hashlib.md5(bytes(word, "utf8")).hexdigest():
+		print("word :", word)
+		# a bad way to terminate but a one that work 
+		# if you have any idea to improve make a pull request
 		os.kill(os.getppid(), 9)
 
 
@@ -21,23 +27,32 @@ if __name__ == "__main__":
 	parser.add_argument("-p", "--passwd", help="hash to crack")
 	args = parser.parse_args()
 	
+	# checking if the password is passed as parameter
 	if args.passwd is None:
 		passwd = input("password hash md5 :")
 		print("\n",passwd,"\n...", sep="")
 	else:
 		passwd = args.passwd
 
+	lenght = 1
+	# checking if the lenght is passed as parameter	
 	if args.len is not None:
-		l = args.len
+		lenght = args.len
 		args.maxlen = args.len +1
-	else:
-		l = 1
-  
-	while l < args.maxlen: # taille max
+	
+	
+	while lenght < args.maxlen: # max lenght
+		# using all cpu core -1 for not freezing the system 
+		# remove the -1 for better perfomance for the brute force but less performance for other programs
 		with mp.Pool(mp.cpu_count()-1) as p:
-			p.imap(myhash,
-                product(string.printable.replace(string.whitespace,""), repeat=l),
+			# You can adjust the chunksize it work quite nice on my computer with 2000 but if you increase it
+			# too much the ram consumption will be important
+			p.imap(hash_func,
+                product(string.printable.replace(string.whitespace,""), repeat=lenght),
                 chunksize=2000)
 			p.close()
 			p.join()
-		l += 1
+		lenght += 1
+
+	# max lenght reached
+	print("password not found")

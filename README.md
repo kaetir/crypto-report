@@ -36,8 +36,6 @@ python md5_hash.py $(cat RainbowTableDemo/passwords.txt)
 
 
 
-
-
 ### Brute-force
 
 ```sh
@@ -68,13 +66,15 @@ python genDico.py -f /tmp/dico.table -l 3 -v 2
 out 
 
 ```
-time to generate the table : 30.276s
+time to generate the table : 0.413s
 the generated file is 29.31 MB
 ```
 
 
 
 #### Usage
+
+Using  grep to find the first occurrence of the hash in the table
 
 ```shell
 grep -m 1 $(python md5_hash.py foo)  /tmp/dico.table 

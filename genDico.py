@@ -5,8 +5,8 @@ from itertools import product
 from multiprocessing import Pool, cpu_count
 from utils import timeDiff, file_size_human_readable
 
-
-def hash_func(word: list):
+# function for generating the hash from an char array
+def hash_func(word: list) -> str:
 	"""
 	@summary join and hash an array of characters
 	@return the concatenation of the word and the hash
@@ -25,10 +25,15 @@ if __name__ == "__main__":
 	
 	t = timeDiff()
 	with open(args.filename, "w") as di:
-		with Pool(cpu_count()) as p:
+		# using all cpu core -1 for not freezing the system 
+		# remove the -1 for better perfomance for the brute force but less performance for other programs
+		with Pool(cpu_count()-1) as p:
+			# You can adjust the chunksize it work quite nice on my computer with 2000 but if you increase it
+			# too much the ram consumption will be important
 			tab = p.imap(hash_func, 
 						product(string.ascii_letters + string.punctuation + string.digits, 
-			  			repeat=args.len))
+			  			repeat=args.len),
+						chunksize=2000)
 			p.close()
 			p.join()
 		di.write("\n".join(tab))
