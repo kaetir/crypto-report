@@ -2,7 +2,7 @@
 import hashlib, string
 import argparse
 from itertools import product
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool, cpu_count, Lock
 from utils import timeDiff, file_size_human_readable
 
 # function for generating the hash from an char array
@@ -13,7 +13,8 @@ def hash_func(word: list) -> str:
 	@return_format {word},{hash}
 	"""
 	word = "".join(word)
-	return word +","+ hashlib.md5(bytes(word, "utf8")).hexdigest()
+	h = hashlib.md5(bytes(word, "utf8")).hexdigest()
+	di.write("{},{}\n".format(word, h))
 
 
 if __name__ == "__main__":
@@ -30,13 +31,13 @@ if __name__ == "__main__":
 		with Pool(cpu_count()-1) as p:
 			# You can adjust the chunksize it work quite nice on my computer with 2000 but if you increase it
 			# too much the ram consumption will be important
-			tab = p.imap(hash_func, 
+			p.imap(hash_func, 
 						product(string.ascii_letters + string.punctuation + string.digits, 
 			  			repeat=args.len),
 						chunksize=2000)
 			p.close()
 			p.join()
-		di.write("\n".join(tab))
+		
 	
 	if args.verbose > 0:
 		print("time to generate the table : {}s".format(t.get_diff_in_s()))
